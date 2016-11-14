@@ -1,0 +1,271 @@
+<!DOCTYPE html><html>
+    <head>
+        <title>
+
+        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <style type='text/css'>
+         body {
+             font-family:'Helvetica';
+             letter-spacing:-5px;
+             background:#000;
+             background-size:100%;
+             color:#fff;
+             margin:0;
+             padding:0;
+             font-weight:bold;
+         }
+
+         h1, h2, h3, p {
+             margin:0;
+         }
+
+         em, a {
+             font-style:normal;
+             color:#8dbd0c;
+         }
+
+         a {
+             background:#34d0e7;
+             color:#000;
+             text-decoration:none;
+         }
+
+         img {
+             width:100%;
+         }
+
+         body > div {
+             cursor:pointer;
+             cursor:hand;
+             position:absolute;
+             top:0px;
+             left:0px;
+             padding:75px;
+             line-height:97%;
+         }
+
+         div.center {
+             text-align:center;
+         }
+
+         div.imageText {
+             text-shadow:0px 0px 5px rgba(0,0,0,0.2);
+         }
+
+         notes {
+             display:none;
+         }
+
+         pre {
+             margin:2;
+             padding:0.2em;
+             background:#fff;
+             color:#000;
+             font-weight:normal;
+         }
+
+         pre em {
+             color:red;
+         }
+         /* normally not good, but ok in context of full screen directional navigation */
+         :focus {
+             outline: 0;
+         }
+        </style>
+        <script src="https://twemoji.maxcdn.com/2/twemoji.min.js?2.2"></script>
+        <script type='text/javascript'>
+         window.onload = function() {
+             var s = document.querySelectorAll('body > div'), ti, i;
+             var notes = [];
+             for (i = 0; i < s.length; i++) {
+                 s[i].setAttribute('tabindex', 0);
+                 var noteElements = s[i].getElementsByTagName('notes');
+                 notes.push([]);
+                 while (noteElements.length) {
+                     var note = noteElements[0];
+                     notes[i].push(note.innerHTML.trim());
+                     note.parentNode.removeChild(note);
+                 }
+             }
+             if (!s.length) return;
+             var big = window.big = { current: 0, forward: fwd, reverse: rev, go: go, length: s.length };
+             function resize() {
+                 var w = window.innerWidth, h = window.innerHeight, e = s[big.current];
+                 e.style.fontSize = h + 'px';
+                 function pass(cinch, start) {
+                     for (var i = start; i > 0 && (e.offsetWidth > w || e.offsetHeight > h); i -= cinch) {
+                         e.style.fontSize = i + 'px';
+                     }
+                     return i + cinch;
+                 }
+                 pass(2, pass(5, pass(10, h - 2)));
+                 e.style.marginTop = (h - e.offsetHeight) / 2 + 'px';
+             }
+             function go(n) {
+                 big.current = n;
+                 for (i = 0; typeof console === 'object' && i < notes[n].length; i++) console.log('%c%s: %s', 'padding:5px;font-family:serif;font-size:18px;line-height:150%;', n, notes[n][i]);
+                 var e = s[n], t = parseInt(e.getAttribute('data-time-to-next') || 0, 10);
+                 document.body.className = e.getAttribute('data-bodyclass') || '';
+                 for (i = 0; i < s.length; i++) s[i].style.display = 'none';
+                 e.style.display = 'inline';
+                 e.focus();
+                 if (e.firstChild && e.firstChild.nodeName === 'IMG') {
+                     document.body.style.backgroundImage = 'url("' + e.firstChild.src + '")';
+                     e.firstChild.style.display = 'none';
+                     if ('classList' in e) e.classList.add('imageText');
+                 } else {
+                     document.body.style.backgroundImage = '';
+                     document.body.style.backgroundColor = e.style.backgroundColor;
+                 }
+                 if (ti !== undefined) window.clearInterval(ti);
+                 if (t > 0) ti = window.setTimeout(fwd, t * 1000);
+                 resize();
+                 if (window.location.hash !== n) window.location.hash = n;
+                 document.title = e.textContent || e.innerText;
+             }
+             document.onclick = function(e) { if (e.target.tagName !== 'A') go(++big.current % s.length); };
+             function fwd() { go(Math.min(s.length - 1, ++big.current)); }
+             function rev() { go(Math.max(0, --big.current)); }
+             document.onkeydown = function(e) {
+                 if (e.which === 39 || e.which === 34 || e.which === 40) fwd();
+                 if (e.which === 37 || e.which === 33 || e.which === 38) rev();
+             };
+             document.ontouchstart = function(e) {
+                 var x0 = e.changedTouches[0].pageX;
+                 document.ontouchend = function(e2) {
+                     var x1 = e2.changedTouches[0].pageX;
+                     if (x1 - x0 < 0) fwd();
+                     if (x1 - x0 > 0) rev();
+                 };
+             };
+             function parse_hash() {
+                 return Math.max(Math.min(s.length - 1,
+                                          parseInt(window.location.hash.substring(1), 10)), 0);
+             }
+             if (window.location.hash) big.current = parse_hash() || big.current;
+             window.onhashchange = function() {
+                 i = parse_hash();
+                 if (i !== big.current) go(i);
+             };
+             window.onresize = resize;
+             go(big.current);
+         };
+        </script></head><body>
+            <div>
+                Instantly Loading Web Maps
+                <notes>Here to discuss making your web maps load instantly on the client's machine</notes>
+            </div>
+            <div>
+                Well, Almost
+                <notes>depending on the speed of the device and library sizes</notes>
+            </div>
+            <div>Nick Peihl <notes>I'm nick peihl...</notes></div>
+            <div>Mad Science <notes>I'm officially the GIS coordinator, but mostly mad scientist...</notes></div>
+            <div>San Juan County</div>
+            <div><em>🗺</em><notes>So I make maps..</notes></div>
+            <div>💻<notes>for computers</notes></div>
+            <div>📱<notes>and mobile phones</notes></div>
+            <div>⚠<notes>And I've learned that performance matters</notes></div>
+            <div>📶<notes>especially for citizens in my county whose internet connections are...</notes></div>
+            <div>💩<notes>well, you know</notes></div>
+            <div>
+                <a href="https://sjcgis.org/polaris">Polaris</a>
+                <notes>
+                    We, like many counties, have a map portal. Ours is called Polaris. I created Polaris three years ago which was my first foray into JS.
+                </notes>
+            </div>
+            <div>
+                <a href="http://github.com/sjcgis/polarisjs">Open Source</a>
+                <notes>I also open sourced it</notes>
+            </div>
+            <div>
+                Issues
+                <notes>There are two major issues</notes>
+            </div>
+            <div>
+                1. 📵
+                <notes>It's not responsive. It's much too complex right now for mobile devices.</notes>
+            </div>
+            <div>
+                😬
+                <notes>My fault. Still figuring out how to resolve that.</notes>
+            </div>
+            <div>2. 🏋
+                <notes>It's a huge framework. Even minified polaris is ~3MB!</notes>
+            </div>
+            <div>
+                <a href="http://developers.arcgis.com/javascript">ArcGIS JavaScript API</a>
+                <notes>Polaris is written using the Esri ArcGIS JavaScript API framework.</notes>
+            </div>
+            <div><a href="http://dojotoolkit.org">Dojo Toolkit</a>
+                <notes>which uses the Dojo toolkit</notes>
+            </div>
+            <div>
+                😕
+                <notes>Even compiling doesn't reduce the size of those frameworks much. So I don't have much control over that</notes>
+            </div>
+            <div>
+                <a href="https://jakearchibald.github.io/isserviceworkerready/">Service Worker</a>
+                <notes>Recently I discovered Service Worker. A new browser technology that saves static assets in the browser, even after the browser is closed.</notes>
+            </div>
+            <div>
+                <a href="https://jakearchibald.com/2014/offline-cookbook/">The Offline Cookbook</a>
+                <notes>I strongly recommend reading more about it in the Offline Cookbook</notes>
+            </div>
+            <div>
+                <a href="https://github.com/GoogleChrome/sw-precache">Service Worker Precache</a>
+                <notes>Service Worker precache is a helper module for creating a service worker for your static assets</notes>
+            </div>
+            <div>
+                <a href="https://github.com/SJCGIS/PolarisJS/blob/master/gruntfile.js#L61-L88">SW Creation for in Polaris</a>
+                <notes>Sw precache has examples for gulp and grunt. Here is the initialization in Polaris' gruntfile.</notes>
+            </div>
+            <div>GOOD
+                <pre>
+...
+staticFileGlobs: [
+  rootDir: '/*.html',
+  rootDir: '/js/app.js'
+  rootDir: '/css/app.css',
+  rootDir: '/img/*.png'
+]
+...
+                </pre>
+                <notes>You can use wildcards to specify the resources that will get cached. But don't get too crazy with wildcards.</notes>
+            </div>
+            <div>
+                BAD
+                <pre><em>rootDir: '/**/*.png|.jpg|.gif'</em></pre>
+                <notes>YMMV, but I did something like this and the Service Worker cached 30MB of assets that I wasn't even using</notes>
+            </div>
+            <div>
+                ☑ Assets
+                <notes>So the assets that power our application shell can load from the SW instead of waiting for the network. Any time the service worker file is changed by the build script, the assets will be downloaded to the client again to make sure they are current.</notes>
+            </div>
+            <div>
+                <img src="polaris-no-map.png" />
+                Map Tiles???
+                <notes>What about the map tiles? Can we cache those?</notes>
+            </div>
+            <div>
+                <pre>
+...
+runtimeCaching: [{
+  urlPattern: /Aerials_2013\/MapServer\/tile\/0,
+  handler: 'fastest'
+}]
+...
+                </pre>
+                <notes>Here we are adding the map tiles from the initial map level, zero in this case. The browser asks both the cache and the network for the images and loads them. If the image is already stored in the cache this is almost always the fastest. But the image is still requested from the server. If the image isn't in the cache or has changed it is added or replaced in the cache for next time.</notes>
+            </div>
+            <div>
+                <em>DEMO</em>
+                <notes>Show how this works in Chrome Dev Tools using the network throttle. Show where the Service Worker cache can be seen and cleared in Dev Tools.</notes>
+            </div>
+            <div>
+                Questions?
+            </div>
+        </body>
+</html>
